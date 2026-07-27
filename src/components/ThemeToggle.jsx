@@ -60,16 +60,21 @@ export default function ThemeToggle() {
     else delete root.dataset.theme;
   }, [available, theme]);
 
+  // Persisting here rather than in the click handler keeps the stored
+  // choice in step with the state React actually settled on.
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('embeddr_theme', theme);
+    } catch {
+      // Storage unavailable: the choice still holds for this visit.
+    }
+  }, [theme]);
+
   if (!available) return null;
 
   const next = theme === 'light' ? 'dark' : 'light';
   const handleToggle = () => {
-    setTheme(next);
-    try {
-      sessionStorage.setItem('embeddr_theme', next);
-    } catch {
-      // Storage unavailable: the choice still holds for this visit.
-    }
+    setTheme((current) => (current === 'light' ? 'dark' : 'light'));
   };
 
   return (
