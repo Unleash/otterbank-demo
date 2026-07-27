@@ -25,6 +25,9 @@ export default function ConsentGate({ consent, agreed, onAgreedChange, children 
         </label>
         <div
           aria-hidden={!agreed}
+          // inert="" (not a boolean: React 18 drops boolean inert) keeps the
+          // collapsed opener out of keyboard reach, not just out of sight.
+          inert={agreed ? undefined : ''}
           className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${agreed ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
         >
           <div className="min-h-0 overflow-hidden">{children}</div>
@@ -51,7 +54,7 @@ export default function ConsentGate({ consent, agreed, onAgreedChange, children 
         // overflow-hidden clips both the blur bleed and the overlay line, so
         // an empty opener area (Auto-Rizz off) shows nothing at all.
         <div className="relative overflow-hidden rounded-xl">
-          <div aria-hidden="true" className="pointer-events-none select-none blur-md">
+          <div aria-hidden="true" inert="" className="pointer-events-none select-none blur-md">
             {children}
           </div>
           <p className="absolute inset-0 flex items-center justify-center px-4 text-center font-mono text-xs text-lavender">

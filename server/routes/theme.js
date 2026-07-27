@@ -7,9 +7,10 @@ export default async function themeRoutes(app) {
       return reply.code(400).send({ error: 'sessionId is required' });
     }
 
-    // The session id in the context keeps a percentage rollout sticky: a
-    // session that gets light mode keeps it as the rollout climbs.
-    const light = isEnabled('light-mode-embeddr-demo', { sessionId });
-    return { theme: light ? 'light' : null };
+    // The flag gates the control, not the theme: when it serves true the
+    // frontend shows the toggle, and the light or dark choice is the
+    // user's own. The session id keeps a percentage rollout sticky.
+    const themeToggle = isEnabled('light-mode', { sessionId });
+    return { themeToggle };
   });
 }

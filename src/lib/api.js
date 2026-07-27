@@ -97,6 +97,11 @@ export async function fetchConsent() {
   return data?.consent ?? null;
 }
 
+export async function fetchThemeToggle() {
+  const data = await post('/theme', {});
+  return data?.themeToggle ?? false;
+}
+
 export async function fetchQrCode() {
   const data = await post('/qr-code', {});
   return data?.qrCode ?? null;

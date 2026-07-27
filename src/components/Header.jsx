@@ -1,4 +1,5 @@
 import RegionSelect from './RegionSelect.jsx';
+import ThemeToggle from './ThemeToggle.jsx';
 
 export default function Header() {
   return (
@@ -14,6 +15,7 @@ export default function Header() {
           </span>
         </div>
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <RegionSelect />
           <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-rose to-lavender font-mono text-xs font-medium text-ink">
             U

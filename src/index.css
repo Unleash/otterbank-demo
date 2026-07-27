@@ -83,10 +83,27 @@
   }
 }
 
+/* Light mode. The header's ThemeToggle sets data-theme="light" on <html>
+   while the light-mode flag serves it, and these overrides repaint every
+   utility that uses the theme tokens. Same hues, flipped values: ink
+   becomes the paper, cream becomes the text. Components never know. */
+[data-theme='light'] {
+  --color-ink: #f7f2fa;
+  --color-surface: #fdfbfe;
+  --color-surface-raised: #efe8f4;
+  --color-line: #ddd0e8;
+  --color-rose: #e34e86;
+  --color-peach: #c96a2e;
+  --color-lavender: #6d55c8;
+  --color-cream: #241a2e;
+  --color-muted: #6f6284;
+}
+
 body {
   background-color: var(--color-ink);
   color: var(--color-cream);
   font-family: var(--font-body);
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 /* Tailwind v4 resets buttons to cursor: default; every enabled button in
