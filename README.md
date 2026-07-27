@@ -37,6 +37,25 @@ and starts the backend, which serves the built frontend and the API from a
 single port. Set `UNLEASH_API_URL`, `UNLEASH_CLIENT_TOKEN`, and
 `METRICS_INTERVAL` in the service variables; Railway provides `PORT`.
 
+## The flags
+
+Every flag is evaluated in the backend with the session id or data-region as Unleash context.
+
+This demo is designed to work with the workshop Unleash instance. If you do not have
+access to that instance, you can replicate the flags in your own instance
+or a [free trial of Unleash](https://www.getunleash.io/pricing), using the
+setup column below.
+
+| Flag | What it does | Setup |
+|------|--------------|-------|
+| `show-QR-code` | Floats the join-the-workshop QR code in a corner of the app. Presenter tooling for the live demo. | Release flag, no targeting. A gradual rollout at 100%. |
+| `regional-consent-test` | The region picked in the header travels as the `data-region` context field; a strategy constraint matches anything starting with `eu-` and serves a consent notice on every card in one of two designs, a classic banner or a minimal chip, A/B tested per EU region. Until the box is ticked the opener stays withheld and Match is disabled. Non-EU regions see nothing. | Release flag plus a custom context field named `data-region` with custom stickiness enabled and no legal values. One strategy: gradual rollout at 100%, a constraint where `data-region` starts with `eu-` (case-insensitive), and two 50/50 strategy variants named `classic` and `minimal`, each with a string payload matching its name and stickiness set to `data-region`. |
+| `auto-rizz` | Serves an opening line on every match card. Ick taps feed the `ick_count` impact metric that a safeguard watches in production. | Release flag, gradual rollout at 100%, default stickiness. The metric and safeguard are optional extras. |
+| `light-mode` | Puts a theme toggle in the header. The light or dark choice is the user's own, per session; the flag only decides whether the control exists. Flag off hides the toggle and the app repaints dark. | Release flag, gradual rollout at 100%, no targeting. |
+
+With the flags off, or without an Unleash connection at all, the app is
+plain Embeddr: six cards, no openers, no upsell, no consent info.
+
 ## The pieces
 
 | Path | What it is |

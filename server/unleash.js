@@ -50,6 +50,15 @@ export function isEnabled(flagName, context) {
   return client ? client.isEnabled(flagName, context) : false;
 }
 
+// Evaluates a flag's variant with the given Unleash context. Returns the
+// built-in disabled variant when the client never started, matching what the
+// SDK returns for an unknown or disabled flag.
+export function getVariant(flagName, context) {
+  return client
+    ? client.getVariant(flagName, context)
+    : { name: 'disabled', enabled: false, feature_enabled: false };
+}
+
 // Reports one Ick tap to Unleash. A no-op in degraded mode, so the endpoint
 // keeps answering even without an Unleash connection.
 export function recordIck() {
