@@ -1,6 +1,18 @@
+import { useEffect, useState } from 'react';
+import ConsentGate from './ConsentGate.jsx';
 import Opener from './Opener.jsx';
 
-export default function ProfileCard({ agent }) {
+export default function ProfileCard({ agent, consent }) {
+  const [consented, setConsented] = useState(false);
+
+  // A design change is a new notice: the tick resets so one arm never
+  // inherits the other's consent.
+  useEffect(() => {
+    setConsented(false);
+  }, [consent?.design]);
+
+  const awaitingConsent = Boolean(consent) && !consented;
+
   return (
     <article className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-6 transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1.5 hover:border-rose/50 hover:shadow-[0_16px_40px_-16px_rgba(255,111,165,0.35)]">
       <div className="mb-5 flex items-start justify-between">
@@ -39,13 +51,18 @@ export default function ProfileCard({ agent }) {
         Love language: <span className="text-peach">{agent.loveLanguage}</span>
       </p>
 
-      <Opener matchId={agent.id} />
+      <ConsentGate consent={consent} agreed={consented} onAgreedChange={setConsented}>
+        <Opener matchId={agent.id} />
+      </ConsentGate>
 
       <div className="mt-auto flex gap-3">
         <button className="flex-1 rounded-full border border-line py-2 text-sm text-muted transition-colors hover:border-muted hover:text-cream">
           Pass
         </button>
-        <button className="flex-1 rounded-full bg-rose py-2 text-sm font-medium text-ink transition-colors hover:bg-peach">
+        <button
+          disabled={awaitingConsent}
+          className="flex-1 rounded-full bg-rose py-2 text-sm font-medium text-ink transition-colors hover:bg-peach disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-rose"
+        >
           Match
         </button>
       </div>

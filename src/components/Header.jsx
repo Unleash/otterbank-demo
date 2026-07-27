@@ -1,7 +1,9 @@
+import RegionSelect from './RegionSelect.jsx';
+
 export default function Header() {
   return (
     <header className="border-b border-line">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-6 py-5">
         <div className="flex items-baseline gap-2">
           <span className="font-display text-2xl font-semibold text-cream">
             embeddr
@@ -11,9 +13,12 @@ export default function Header() {
             find your nearest neighbor
           </span>
         </div>
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-rose to-lavender font-mono text-xs font-medium text-ink">
-          U
-        </span>
+        <div className="flex items-center gap-3">
+          <RegionSelect />
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-rose to-lavender font-mono text-xs font-medium text-ink">
+            U
+          </span>
+        </div>
       </div>
     </header>
   );
