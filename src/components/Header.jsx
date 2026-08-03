@@ -1,26 +1,23 @@
-import RegionSelect from './RegionSelect.jsx';
-import ThemeToggle from './ThemeToggle.jsx';
+import { user } from '../data/account.js';
 
 export default function Header() {
   return (
-    <header className="border-b border-line">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-6 py-5">
-        <div className="flex items-baseline gap-2">
-          <span className="font-display text-2xl font-semibold text-cream">
-            embeddr
-            <span className="text-rose">.</span>
+    <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
+      <div className="flex items-center justify-between gap-3 px-5 py-4">
+        <div className="flex items-center gap-2.5">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-mint text-lg" aria-hidden="true">
+            🦦
           </span>
-          <span className="hidden font-mono text-xs text-muted sm:inline">
-            find your nearest neighbor
+          <span className="font-display text-xl font-semibold tracking-tight">
+            Otterbank
           </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <RegionSelect />
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-rose to-lavender font-mono text-xs font-medium text-ink">
-            U
+          <span className="rounded-full border border-amber/40 bg-amber-soft px-2 py-0.5 font-mono text-[10px] font-medium tracking-widest text-amber uppercase">
+            demo
           </span>
         </div>
+        <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-brand to-brand-deep font-mono text-xs font-medium text-white">
+          {user.firstName[0]}
+        </span>
       </div>
     </header>
   );

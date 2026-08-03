@@ -6,14 +6,13 @@ import cors from '@fastify/cors';
 import fastifyStatic from '@fastify/static';
 import { startUnleash } from './unleash.js';
 import healthRoutes from './routes/health.js';
-import openerRoutes from './routes/opener.js';
-import ickRoutes from './routes/ick.js';
-import qrRoutes from './routes/qr.js';
-import consentRoutes from './routes/consent.js';
-import themeRoutes from './routes/theme.js';
+import transferRoutes from './routes/transfers.js';
+import assistantRoutes from './routes/assistant.js';
+import feedbackRoutes from './routes/feedback.js';
 
-// Request logging off: with six cards polling every few seconds it drowns
-// the logs that matter during the workshop (sync status, warnings, icks).
+// Request logging off: the frontend polls flag state every second, which
+// would drown the logs that matter during a demo (sync status, warnings,
+// thumbs-down taps).
 const app = Fastify({ logger: true, disableRequestLogging: true });
 
 await app.register(cors, {
@@ -23,15 +22,13 @@ await app.register(cors, {
 startUnleash(app.log);
 
 await app.register(healthRoutes);
-await app.register(openerRoutes);
-await app.register(ickRoutes);
-await app.register(qrRoutes);
-await app.register(consentRoutes);
-await app.register(themeRoutes);
+await app.register(transferRoutes);
+await app.register(assistantRoutes);
+await app.register(feedbackRoutes);
 
 // Deployed mode: one process serves both the API and the frontend build.
 // Registered API routes always win; unknown GET paths fall back to the SPA.
-// During the workshop the frontend runs on Vite instead, so a missing dist
+// In local dev the frontend runs on Vite instead, so a missing dist
 // changes nothing.
 const distDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 if (existsSync(distDir)) {

@@ -1,19 +1,26 @@
 import { initialize } from 'unleash-client';
 
-// Flag refresh interval in milliseconds. 5s keeps a flag toggle visible in
-// the app within seconds without hammering the instance from a room full
-// of backends.
-const REFRESH_INTERVAL = 5000;
+// Flag refresh interval in milliseconds. 1s keeps a toggle visible in the
+// app almost immediately: backend refresh plus frontend poll stays within
+// a couple of seconds end to end, which is what the on-camera
+// instant-transfers reveal needs.
+const REFRESH_INTERVAL = 1000;
 
-// Impact metric for Ick taps. Counters only go up; the safeguard watches the
-// rate over a short window. Reported on the METRICS_INTERVAL cadence.
-const ICK_METRIC = 'ick_count';
+// The Unleash project the flags live in. The client token may already be
+// scoped to it; this filter makes the scoping explicit either way.
+const PROJECT_NAME = process.env.UNLEASH_PROJECT || 'otterbank-demo';
+
+// Impact metrics for feedback taps on spending assistant replies. Counters
+// only go up; the safeguard watches the thumbs-down rate over a short
+// window. Reported on the METRICS_INTERVAL cadence.
+const THUMBS_UP_METRIC = 'thumbs_up_count';
+const THUMBS_DOWN_METRIC = 'thumbs_down_count';
 
 let client = null;
 
 // Starts the server-side Unleash client. When the connection details are
-// missing the backend still boots and every flag evaluates to off, so the app
-// degrades to the plain Embeddr experience instead of crashing.
+// missing the backend still boots and every flag evaluates to off, so the
+// app degrades to the plain Otterbank experience instead of crashing.
 export function startUnleash(log) {
   const url = process.env.UNLEASH_API_URL;
   const token = process.env.UNLEASH_CLIENT_TOKEN;
@@ -29,7 +36,8 @@ export function startUnleash(log) {
 
   client = initialize({
     url,
-    appName: 'embeddr-server',
+    appName: 'otterbank-server',
+    projectName: PROJECT_NAME,
     customHeaders: { Authorization: token },
     refreshInterval: REFRESH_INTERVAL,
     metricsInterval: Number(process.env.METRICS_INTERVAL) || 60000,
@@ -39,7 +47,14 @@ export function startUnleash(log) {
   client.on('warn', (msg) => log.warn(`unleash: ${msg}`));
   client.on('synchronized', () => log.info('unleash: flags synchronized'));
 
-  client.impactMetrics.defineCounter(ICK_METRIC, 'Ick taps on Auto-Rizz openers');
+  client.impactMetrics.defineCounter(
+    THUMBS_UP_METRIC,
+    'Thumbs-up taps on spending assistant replies'
+  );
+  client.impactMetrics.defineCounter(
+    THUMBS_DOWN_METRIC,
+    'Thumbs-down taps on spending assistant replies'
+  );
 
   return client;
 }
@@ -50,19 +65,11 @@ export function isEnabled(flagName, context) {
   return client ? client.isEnabled(flagName, context) : false;
 }
 
-// Evaluates a flag's variant with the given Unleash context. Returns the
-// built-in disabled variant when the client never started, matching what the
-// SDK returns for an unknown or disabled flag.
-export function getVariant(flagName, context) {
-  return client
-    ? client.getVariant(flagName, context)
-    : { name: 'disabled', enabled: false, feature_enabled: false };
-}
-
-// Reports one Ick tap to Unleash. A no-op in degraded mode, so the endpoint
-// keeps answering even without an Unleash connection.
-export function recordIck() {
-  if (client) client.impactMetrics.incrementCounter(ICK_METRIC);
+// Reports one feedback tap to Unleash. A no-op in degraded mode, so the
+// endpoint keeps answering even without an Unleash connection.
+export function recordFeedback(helpful) {
+  if (!client) return;
+  client.impactMetrics.incrementCounter(helpful ? THUMBS_UP_METRIC : THUMBS_DOWN_METRIC);
 }
 
 export function getClient() {
