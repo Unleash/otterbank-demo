@@ -15,7 +15,7 @@ export default async function feedbackRoutes(app) {
     const counts = feedbackCounts.get(sessionId) ?? { up: 0, down: 0 };
     counts[kind] += 1;
     feedbackCounts.set(sessionId, counts);
-    recordFeedback(Boolean(helpful));
+    recordFeedback(Boolean(helpful), sessionId);
     request.log.info({ sessionId, ...counts }, `thumbs-${kind} recorded`);
 
     return { ok: true };

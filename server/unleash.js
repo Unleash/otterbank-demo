@@ -16,6 +16,11 @@ const PROJECT_NAME = process.env.UNLEASH_PROJECT || 'otterbank-demo';
 const THUMBS_UP_METRIC = 'thumbs_up_count';
 const THUMBS_DOWN_METRIC = 'thumbs_down_count';
 
+// The flag the feedback metrics belong to. Passed as flag context on every
+// increment so the samples carry the flag label — without it, a safeguard
+// chart filtered to the flag sees no data and reads zero.
+const ASSISTANT_FLAG = 'spending-assistant';
+
 let client = null;
 
 // Starts the server-side Unleash client. When the connection details are
@@ -65,11 +70,15 @@ export function isEnabled(flagName, context) {
   return client ? client.isEnabled(flagName, context) : false;
 }
 
-// Reports one feedback tap to Unleash. A no-op in degraded mode, so the
-// endpoint keeps answering even without an Unleash connection.
-export function recordFeedback(helpful) {
+// Reports one feedback tap to Unleash, labeled with the assistant flag so
+// flag-scoped safeguard charts pick it up. A no-op in degraded mode, so
+// the endpoint keeps answering even without an Unleash connection.
+export function recordFeedback(helpful, sessionId) {
   if (!client) return;
-  client.impactMetrics.incrementCounter(helpful ? THUMBS_UP_METRIC : THUMBS_DOWN_METRIC);
+  client.impactMetrics.incrementCounter(helpful ? THUMBS_UP_METRIC : THUMBS_DOWN_METRIC, 1, {
+    flagNames: [ASSISTANT_FLAG],
+    context: { sessionId },
+  });
 }
 
 export function getClient() {
