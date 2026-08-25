@@ -2,10 +2,24 @@
 // balance, transactions and contacts are fixed, and the assistant's canned
 // answers in server/data/assistant.js quote the same numbers.
 
-export const user = {
-  firstName: 'Mel',
-  fullName: 'Mel Rivers',
-};
+// The demo panel's "signed in" users. Their id goes into the Unleash
+// context as userId, so switching users is how stickiness demos show an
+// assignment following a person instead of a browser session. Mel is the
+// default; the others exist to be switched to.
+//
+// The ids are hash-picked on purpose: with three evenly weighted
+// savings-boost variants, mel and maya land in one bucket and jonas.feld
+// and priya in the two others, so the four users always cover all three
+// pitches regardless of the variants' order or exact weights. Renaming an
+// id reshuffles that spread.
+export const demoUsers = [
+  { id: 'mel', firstName: 'Mel', fullName: 'Mel Rivers' },
+  { id: 'maya', firstName: 'Maya', fullName: 'Maya Brook' },
+  { id: 'jonas.feld', firstName: 'Jonas', fullName: 'Jonas Feld' },
+  { id: 'priya', firstName: 'Priya', fullName: 'Priya Nair' },
+];
+
+export const user = demoUsers[0];
 
 export const card = {
   number: '•••• •••• •••• 4021',

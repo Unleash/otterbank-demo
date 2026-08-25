@@ -33,7 +33,7 @@ const TABS = [
 
 // Bottom tabs keep primary actions in thumb reach on a phone. The set is
 // fixed so the nav always reads like a real bank; the flag-gated assistant
-// lives behind the card on Home, not here.
+// lives behind the floating otter button, not here.
 export default function TabBar({ tab, onChange }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40">

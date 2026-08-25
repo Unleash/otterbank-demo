@@ -9,6 +9,8 @@ import healthRoutes from './routes/health.js';
 import transferRoutes from './routes/transfers.js';
 import assistantRoutes from './routes/assistant.js';
 import feedbackRoutes from './routes/feedback.js';
+import savingsRoutes from './routes/savings.js';
+import experimentRoutes from './routes/experiments.js';
 
 // Request logging off: the frontend polls flag state every second, which
 // would drown the logs that matter during a demo (sync status, warnings,
@@ -25,6 +27,8 @@ await app.register(healthRoutes);
 await app.register(transferRoutes);
 await app.register(assistantRoutes);
 await app.register(feedbackRoutes);
+await app.register(savingsRoutes);
+await app.register(experimentRoutes);
 
 // Deployed mode: one process serves both the API and the frontend build.
 // Registered API routes always win; unknown GET paths fall back to the SPA.
