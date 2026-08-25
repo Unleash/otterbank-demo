@@ -16,10 +16,20 @@ const PROJECT_NAME = process.env.UNLEASH_PROJECT || 'otterbank-demo';
 const THUMBS_UP_METRIC = 'thumbs_up_count';
 const THUMBS_DOWN_METRIC = 'thumbs_down_count';
 
-// The flag the feedback metrics belong to. Passed as flag context on every
-// increment so the samples carry the flag label — without it, a safeguard
-// chart filtered to the flag sees no data and reads zero.
+// Conversion metric for the savings-boost A/B/n test: one increment per
+// tap on the savings card's call to action. Labeled with the flag context
+// below, so every sample carries the variant that produced the tap and the
+// variants can be compared side by side in Unleash.
+const SAVINGS_CLICK_METRIC = 'savings_cta_click_count';
+
+// The flags the metrics belong to. Passed as flag context on every
+// increment so the samples carry the flag and variant labels — without
+// them, a chart filtered to the flag sees no data and reads zero.
+// Feedback taps carry spending-assistant-tone too, so thumbs-down can be broken
+// down by tone variant: the full-stack experiment's success metric.
 const ASSISTANT_FLAG = 'spending-assistant';
+const TONE_FLAG = 'spending-assistant-tone';
+const SAVINGS_FLAG = 'savings-boost';
 
 let client = null;
 
@@ -52,6 +62,25 @@ export function startUnleash(log) {
   client.on('warn', (msg) => log.warn(`unleash: ${msg}`));
   client.on('synchronized', () => log.info('unleash: flags synchronized'));
 
+  // Impression capture: flags with "impression data" enabled in Unleash
+  // emit one event per evaluation. Logging them is the demo — the log line
+  // is what shows an analytics pipeline would receive (event type, flag,
+  // variant, session). The frontend polls every second, so expect a steady
+  // stream while such a flag is on screen.
+  client.on('impression', (event) => {
+    log.info(
+      {
+        eventType: event.eventType,
+        featureName: event.featureName,
+        enabled: event.enabled,
+        variant: event.variant,
+        sessionId: event.context?.sessionId,
+        userId: event.context?.userId,
+      },
+      'unleash: impression'
+    );
+  });
+
   client.impactMetrics.defineCounter(
     THUMBS_UP_METRIC,
     'Thumbs-up taps on spending assistant replies'
@@ -59,6 +88,10 @@ export function startUnleash(log) {
   client.impactMetrics.defineCounter(
     THUMBS_DOWN_METRIC,
     'Thumbs-down taps on spending assistant replies'
+  );
+  client.impactMetrics.defineCounter(
+    SAVINGS_CLICK_METRIC,
+    'Taps on the savings-boost card call to action'
   );
 
   return client;
@@ -70,14 +103,35 @@ export function isEnabled(flagName, context) {
   return client ? client.isEnabled(flagName, context) : false;
 }
 
-// Reports one feedback tap to Unleash, labeled with the assistant flag so
-// flag-scoped safeguard charts pick it up. A no-op in degraded mode, so
-// the endpoint keeps answering even without an Unleash connection.
-export function recordFeedback(helpful, sessionId) {
+// Evaluates a variant flag. The disabled fallback mirrors the SDK's own
+// shape, so routes can read .enabled and .name without null checks in
+// degraded mode.
+export function getVariant(flagName, context) {
+  if (!client) return { name: 'disabled', enabled: false, feature_enabled: false };
+  return client.getVariant(flagName, context);
+}
+
+// Reports one feedback tap to Unleash. The flag context labels each sample
+// with the assistant flag and the tone variant the session is in, so
+// flag-scoped safeguard charts pick it up and thumbs-down can be compared
+// per tone. A no-op in degraded mode, so the endpoint keeps answering even
+// without an Unleash connection.
+export function recordFeedback(helpful, context) {
   if (!client) return;
   client.impactMetrics.incrementCounter(helpful ? THUMBS_UP_METRIC : THUMBS_DOWN_METRIC, 1, {
-    flagNames: [ASSISTANT_FLAG],
-    context: { sessionId },
+    flagNames: [ASSISTANT_FLAG, TONE_FLAG],
+    context,
+  });
+}
+
+// Reports one savings-card CTA tap: the conversion event of the A/B/n
+// test. The flag context resolves the session's savings-boost variant, so
+// the counter breaks down per variant in Unleash.
+export function recordSavingsClick(context) {
+  if (!client) return;
+  client.impactMetrics.incrementCounter(SAVINGS_CLICK_METRIC, 1, {
+    flagNames: [SAVINGS_FLAG],
+    context,
   });
 }
 

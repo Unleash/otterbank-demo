@@ -22,21 +22,56 @@ the viewer sees on the phone.
 | Flag | Feature | Demo role |
 |------|---------|-----------|
 | `instant-transfers` | "Send money instantly" card on Home | One-click wow moment. Off: card absent. On: card slides in within a second or two of the toggle. |
-| `spending-assistant` | AI assistant behind a "Try it now" card on Home | Progressive rollout with the `thumbs_down_count` impact metric and an automated safeguard pause. Off: no trace of it. On: the card appears within a second or two; tapping it opens the chat. |
+| `spending-assistant` | AI assistant behind a floating otter button | Progressive rollout with the `thumbs_down_count` impact metric and an automated safeguard pause. Off: no trace of it. On: the otter button pops in above the tab bar within a second or two; tapping it opens the chat. |
+| `savings-boost` | Savings promo card on the Payments tab | A/B/n test with strategy variants. Create variants named `round-up`, `goal-tracker` and `cashback`; the card renders whichever pitch the session is assigned (an unrecognized variant name falls back to a generic pitch). Every CTA tap reports the `savings_cta_click_count` impact metric, labeled with the variant that produced it. Enable **impression data** on this flag and the backend logs one impression event per evaluation. |
+| `spending-assistant-tone` | The assistant's answer style | Full-stack experiment: same chat UI, different server-side behavior. Create variants `classic` and `sassy`; classic answers are brief and friendly, sassy answers are brief with attitude (marked 😏). Thumbs-up/down impact metrics carry this flag's variant label, so helpfulness can be compared per tone. Off or unknown variant: classic. |
 
-Both flags are evaluated with the browser session id as context, so
-percentage rollouts are sticky per browser. The backend refreshes flags
-every second and the frontend polls the backend every second, so a toggle
-lands on camera in one to two seconds.
+Every flag is evaluated with the browser session id and the demo user id
+as context. The backend refreshes flags every second and the frontend
+polls the backend every second, so a toggle lands on camera in one to two
+seconds.
+
+## The demo panel
+
+Tapping the "demo" badge in the header opens the demo controls: a user
+switcher (which user id goes into the Unleash context), a "New session"
+button (regenerates the session id without touching the user), and a live
+readout of every flag and variant assignment for the current context.
+
+That panel is the stickiness demo. Set a strategy's stickiness to
+`sessionId` and "New session" may reshuffle the variant while the user
+switcher does nothing; set it to `userId` and the assignment follows the
+user across sessions. Note that Unleash's **default** stickiness prefers
+`userId` when it's present in the context — and it always is here — so set
+stickiness explicitly on flags where the distinction matters on camera.
 
 ## The impact metrics
 
-Every feedback tap on an assistant reply increments a counter defined in
-[`server/unleash.js`](server/unleash.js): thumbs-up reports
-`thumbs_up_count`, thumbs-down reports `thumbs_down_count`. Point the
-safeguard for the `spending-assistant` rollout at `thumbs_down_count`;
-repeated thumbs-down taps during a demo trip the automated pause. Lower
-`METRICS_INTERVAL` (milliseconds) so taps reach Unleash within seconds.
+All counters are defined in [`server/unleash.js`](server/unleash.js).
+Every feedback tap on an assistant reply increments one: thumbs-up reports
+`thumbs_up_count`, thumbs-down reports `thumbs_down_count`, and both are
+labeled with the session's `spending-assistant` and `spending-assistant-tone`
+variants. Every tap on the savings card's CTA reports
+`savings_cta_click_count`, labeled with the `savings-boost` variant — the
+conversion metric of the A/B/n test.
+
+Point the safeguard for the `spending-assistant` rollout at
+`thumbs_down_count`; repeated thumbs-down taps during a demo trip the
+automated pause. Lower `METRICS_INTERVAL` (milliseconds) so taps reach
+Unleash within seconds. Repeated taps are allowed everywhere on purpose:
+that's how a live demo generates enough samples to chart.
+
+## Learning lab map
+
+- **M5.1 Variants and A/B/n testing** — `savings-boost`: strategy
+  variants pick the pitch, `savings_cta_click_count` is the conversion,
+  and impression data (turn it on in the flag's settings) streams
+  evaluation events into the backend log.
+- **M5.2 Full-stack experimentation** — `spending-assistant-tone`: the flag
+  changes what the server does, not what the UI shows, and the
+  thumbs-up/down impact metrics measure which tone actually helps.
+- **M5.3 Stickiness** — the demo panel behind the "demo" badge: switch
+  users, reset the session, and watch which assignments hold.
 
 ## Run it
 

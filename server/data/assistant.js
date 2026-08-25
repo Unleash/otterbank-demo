@@ -2,60 +2,60 @@
 // transaction list on the Home screen, so answers read as real analysis of
 // the account on camera. Keyword buckets are checked in order; the first
 // match wins, and anything unmatched falls back to a stable generic line.
+//
+// Two tones, switched by the spending-assistant-tone variant flag, each a
+// complete short reply: "classic" is brief and friendly, "sassy" is brief
+// with attitude (marked 😏 so the variant is identifiable on camera). Kept
+// to one or two lines on purpose — long answers upstage a demo.
 
 const ANSWER_BUCKETS = [
   {
     keywords: ['coffee', 'latte', 'cafe', 'café'],
-    reply:
-      "You've spent $38.60 on coffee in the last 30 days — eight visits to Fern & Ferry, " +
-      'averaging $4.83 a cup. That works out to about $1.29 a day. As habits go, there are worse.',
+    reply: 'Coffee: $38.60 in the last 30 days — eight Fern & Ferry runs at about $4.83 a cup.',
+    sassy: '$38.60 on coffee this month. The barista is basically on your payroll. 😏',
   },
   {
     keywords: ['biggest', 'largest', 'most expensive', 'top expense'],
-    reply:
-      'Your biggest expense this month is rent: $1,450.00 to Maple Court on 28 July. ' +
-      'Next comes groceries at $284.90, then subscriptions at $34.97.',
+    reply: 'Rent is the big one: $1,450.00 to Maple Court. Groceries ($284.90) come a distant second.',
+    sassy: 'Rent. $1,450.00. Shocking, I know. 😏',
   },
   {
     keywords: ['subscription', 'streaming', 'recurring'],
-    reply:
-      'You have three active subscriptions totalling $34.97 a month: Streamly ($11.99), ' +
-      "CloudTunes ($9.99) and FitOtter ($12.99). FitOtter hasn't been opened since May — just saying.",
+    reply: 'Three subscriptions, $34.97 a month: Streamly, CloudTunes and FitOtter.',
+    sassy: 'Streamly, CloudTunes, FitOtter — $34.97 a month. One of those is purely aspirational, isn’t it? 😏',
   },
   {
     keywords: ['last month', 'compare', 'july', 'june', 'month before'],
-    reply:
-      "You've spent $1,586.34 so far this month — about 12% less than at the same point in July. " +
-      'Groceries are down, transport is down, and coffee is… exactly the same. Consistency!',
+    reply: "You're at $1,586.34 this month — about 12% less than July at this point.",
+    sassy: 'Down 12% from July. Everything shrank except the coffee budget. Sacred, apparently. 😏',
   },
   {
     keywords: ['grocer', 'food', 'eating', 'supermarket'],
-    reply:
-      'Groceries add up to $284.90 this month, nearly all of it at GreenMart. ' +
-      "That's $23 under your three-month average, so no notes from me.",
+    reply: 'Groceries: $284.90 this month, about $23 under your usual. Nicely done.',
+    sassy: '$284.90 on groceries — under budget. Adulting achievement unlocked. 😏',
   },
   {
     keywords: ['save', 'saving', 'budget', 'goal'],
-    reply:
-      "At your current pace you'll end the month roughly $610 under July. Moving $150 of that " +
-      'into savings would keep you on track for your $5,000 goal by December.',
+    reply: "You're about $610 under July. Move $150 to savings and your $5,000 goal stays on track.",
+    sassy: "$610 ahead, and your savings account hasn't heard about any of it. Interesting strategy. 😏",
   },
   {
     keywords: ['balance', 'how much do i have', 'account'],
-    reply:
-      'Your available balance is $4,826.40. Rent has already gone out this cycle, ' +
-      'so the rest of the month should be smooth sailing.',
+    reply: 'Your balance is $4,826.40, and rent is already paid this cycle.',
+    sassy: "$4,826.40. Rent's paid — try not to celebrate it all at Fern & Ferry. 😏",
   },
 ];
 
 // Fallback lines for questions outside the buckets. Picked by a stable hash
 // so the same question gets the same answer across taps and demos.
 const FALLBACK_REPLIES = [
-  "Good question. Looking at your last 30 days, nothing unusual stands out — spending is steady and your balance is trending up since payday on 1 August.",
-  "I dug through your recent activity and the short version is: you're fine. Rent and groceries dominate, everything else is small change.",
-  "Nothing alarming in your recent transactions. If you want specifics, try asking about coffee, subscriptions, or your biggest expense.",
-  "Based on your last 30 days, your spending is on the calm side. Ask me about a category — coffee, groceries, subscriptions — and I'll break it down.",
+  'Nothing unusual in your last 30 days — spending steady, balance up since payday.',
+  "Short version: you're fine. Try asking about coffee, subscriptions, or your biggest expense.",
+  'All calm. Ask me about a category — coffee, groceries, subscriptions — for the details.',
 ];
+
+const FALLBACK_SASSY =
+  'All quiet. I know — riveting. Ask about your subscriptions if you want drama. 😏';
 
 // Stable hash so a session keeps seeing the same fallback line for the same
 // question instead of the answer reshuffling between polls or retries.
@@ -68,12 +68,14 @@ function stablePick(seed, length) {
   return Math.abs(hash) % length;
 }
 
-export function answerFor(question, sessionId) {
+export function answerFor(question, sessionId, tone) {
+  const sassy = tone === 'sassy';
   const normalized = question.toLowerCase();
   for (const bucket of ANSWER_BUCKETS) {
     if (bucket.keywords.some((keyword) => normalized.includes(keyword))) {
-      return bucket.reply;
+      return sassy ? bucket.sassy : bucket.reply;
     }
   }
+  if (sassy) return FALLBACK_SASSY;
   return FALLBACK_REPLIES[stablePick(`${sessionId}:${normalized}`, FALLBACK_REPLIES.length)];
 }

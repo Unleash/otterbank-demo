@@ -1,7 +1,9 @@
+import SavingsBoostCard from './SavingsBoostCard.jsx';
 import { contacts, upcomingPayments } from '../data/account.js';
 
 // Supporting screen: makes the nav read like a real bank. Static mock
-// data, minimal polish — it's never the star on camera.
+// data, minimal polish — plus the flag-gated savings pitch, which lives
+// here so Home doesn't drown in promo cards when every flag is on.
 export default function Payments() {
   return (
     <div className="flex flex-col gap-5">
@@ -29,6 +31,8 @@ export default function Payments() {
           </div>
         </div>
       </section>
+
+      <SavingsBoostCard />
 
       <section>
         <h2 className="font-display mb-2.5 px-1 text-base font-semibold">Upcoming</h2>

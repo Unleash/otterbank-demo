@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { askAssistant, reportFeedback } from '../lib/api.js';
-import { user, suggestedQuestions } from '../data/account.js';
+import { suggestedQuestions } from '../data/account.js';
 
 // Minimum "thinking" time so canned answers read as computed, not pasted.
 const THINKING_MS = 700;
-
-const GREETING =
-  `Hi ${user.firstName}! I'm your spending assistant. Ask me anything about ` +
-  'your money — or try one of the questions below.';
 
 // Only reachable in the race between the flag turning off and the tab
 // disappearing a second later; the answer endpoint returns null then.
@@ -129,9 +125,15 @@ function BackIcon({ className }) {
 // The chat screen. Only rendered while spending-assistant serves this
 // session — App owns that decision, and the "Try it now" card on Home is
 // the only way in.
-export default function Assistant({ onBack }) {
+export default function Assistant({ onBack, activeUser }) {
   const [messages, setMessages] = useState([
-    { id: 'greeting', role: 'assistant', text: GREETING },
+    {
+      id: 'greeting',
+      role: 'assistant',
+      text:
+        `Hi ${activeUser.firstName}! I'm your spending assistant. Ask me anything about ` +
+        'your money — or try one of the questions below.',
+    },
   ]);
   const [typing, setTyping] = useState(false);
   const [input, setInput] = useState('');

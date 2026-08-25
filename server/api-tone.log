@@ -1,0 +1,6 @@
+{"level":30,"time":1787660502539,"pid":39108,"hostname":"Melindas-MacBook-Air.local","msg":"serving the frontend build from dist"}
+{"level":30,"time":1787660502542,"pid":39108,"hostname":"Melindas-MacBook-Air.local","msg":"Server listening at http://127.0.0.1:3299"}
+{"level":30,"time":1787660502542,"pid":39108,"hostname":"Melindas-MacBook-Air.local","msg":"Server listening at http://192.168.0.136:3299"}
+{"level":30,"time":1787660502551,"pid":39108,"hostname":"Melindas-MacBook-Air.local","msg":"unleash: flags synchronized"}
+{"level":30,"time":1787660505304,"pid":39108,"hostname":"Melindas-MacBook-Air.local","reqId":"req-1","sessionId":"x","up":1,"down":0,"msg":"thumbs-up recorded"}
+{"level":30,"time":1787660505312,"pid":39108,"hostname":"Melindas-MacBook-Air.local","reqId":"req-2","sessionId":"x","up":1,"down":1,"msg":"thumbs-down recorded"}
