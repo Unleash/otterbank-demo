@@ -48,12 +48,18 @@ stickiness explicitly on flags where the distinction matters on camera.
 ## The impact metrics
 
 All counters are defined in [`server/unleash.js`](server/unleash.js).
-Every feedback tap on an assistant reply increments one: thumbs-up reports
-`thumbs_up_count`, thumbs-down reports `thumbs_down_count`, and both are
-labeled with the session's `spending-assistant` and `spending-assistant-tone`
-variants. Every tap on the savings card's CTA reports
-`savings_cta_click_count`, labeled with the `savings-boost` variant — the
-conversion metric of the A/B/n test.
+Charts for internal impact metrics can only filter by
+`appName`/`environment`/`origin`, not by custom labels, so per-variant
+comparisons get dedicated counters with the variant in the metric name.
+
+Every feedback tap on an assistant reply increments `thumbs_up_count` or
+`thumbs_down_count` (the overall counters the safeguard watches) plus the
+counter for the session's tone: `thumbs_up_classic_count`,
+`thumbs_down_sassy_count`, and so on. Every tap on the savings card's CTA
+reports `savings_cta_click_count` plus one of
+`savings_cta_click_round_up_count` / `..._goal_tracker_...` /
+`..._cashback_...` — chart those against each other for the A/B/n
+comparison.
 
 Point the safeguard for the `spending-assistant` rollout at
 `thumbs_down_count`; repeated thumbs-down taps during a demo trip the
