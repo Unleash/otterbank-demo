@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { fetchExperiments } from '../lib/api.js';
 import { demoUsers } from '../data/account.js';
+import demoQr from '../assets/demo-qr.svg';
+
+// Where the QR code below points: the deployed demo, so viewers can pull
+// the app up on their own phones mid-presentation.
+const DEMO_URL = 'https://otterbank-demo-production.up.railway.app/';
 
 // Poll cadence for the live assignment readout, matching the rest of the
 // app so the panel reflects a toggle or reassignment within a second or two.
@@ -110,6 +115,26 @@ export default function DemoPanel({ open, onClose, activeUserId, onSelectUser, s
             ))}
             {!flags && <li className="text-xs text-muted">Waiting for the backend…</li>}
           </ul>
+        </section>
+
+        <section className="mt-4">
+          <h3 className="font-mono text-[10px] font-medium tracking-widest text-muted uppercase">
+            Try it yourself
+          </h3>
+          <div className="mt-2 flex items-center gap-4">
+            <img
+              src={demoQr}
+              alt="QR code linking to the deployed Otterbank demo"
+              className="h-28 w-28 shrink-0 rounded-xl border border-line bg-white"
+            />
+            <p className="text-xs text-muted">
+              Scan to open the deployed demo on your phone, or visit{' '}
+              <a href={DEMO_URL} className="font-medium text-brand-deep underline">
+                {new URL(DEMO_URL).host}
+              </a>
+              .
+            </p>
+          </div>
         </section>
       </div>
     </div>
